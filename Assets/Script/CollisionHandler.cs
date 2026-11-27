@@ -8,6 +8,8 @@ public class CollisionHandler : MonoBehaviour
     [SerializeField] float timeBreak = 2f;
     [SerializeField] AudioClip succesSound;
     [SerializeField] AudioClip crashSound;
+    [SerializeField] ParticleSystem succesParticle;
+    [SerializeField] ParticleSystem crashParticle;
 
     AudioSource audioSource;
     bool isControllable = true;
@@ -38,18 +40,16 @@ public class CollisionHandler : MonoBehaviour
 
     void StartNextSequence()
     {
-        GetComponent<Movement>().enabled = false;
-        isControllable = false;
-        audioSource.Stop();
+        StopTheGameShortly();
+        succesParticle.Play();
         audioSource.PlayOneShot(succesSound);
         Invoke("NextScene", timeBreak);
     }
 
     void StartCrashSequence()
     {
-        GetComponent<Movement>().enabled = false;
-        isControllable = false;
-        audioSource.Stop();
+        StopTheGameShortly();
+        crashParticle.Play();
         audioSource.PlayOneShot(crashSound);
         Invoke("ReloadScene", timeBreak);
     }
@@ -69,6 +69,13 @@ public class CollisionHandler : MonoBehaviour
     void ReloadScene()
     {
         SceneManager.LoadScene(currentScene);
+    }
+
+    void StopTheGameShortly()
+    {
+        GetComponent<Movement>().enabled = false;
+        isControllable = false;
+        audioSource.Stop();
     }
 
 }
