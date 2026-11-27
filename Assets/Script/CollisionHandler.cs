@@ -3,28 +3,72 @@ using UnityEngine.SceneManagement;
 
 public class CollisionHandler : MonoBehaviour
 {
+    int currentScene;
+
+    [SerializeField] float timeBreak = 2f;
+    [SerializeField] AudioClip succesSound;
+    [SerializeField] AudioClip crashSound;
+
+    AudioSource audioSource;
+    bool isControllable = true;
+
+    void Start()
+    {
+        currentScene = SceneManager.GetActiveScene().buildIndex;
+        audioSource = GetComponent<AudioSource>();
+    }
+
     private void OnCollisionEnter(Collision other)
     {
+        if (!isControllable) { return; }
+
         switch (other.gameObject.tag)
         {
             case "Friendly":
                 Debug.Log("Start from here bubu");
                 break;
             case "Finish":
-                Debug.Log("Finish");
-                break;
-            case "Fuel":
-                Debug.Log("You got ekstra fuel bubu");
+                StartNextSequence();
                 break;
             default:
-                ReloadScene();
+                StartCrashSequence();
                 break;
         }
-
-        void ReloadScene()
-        {
-            int currentScene = SceneManager.GetActiveScene().buildIndex;
-            SceneManager.LoadScene(currentScene);
-        }
     }
+
+    void StartNextSequence()
+    {
+        GetComponent<Movement>().enabled = false;
+        isControllable = false;
+        audioSource.Stop();
+        audioSource.PlayOneShot(succesSound);
+        Invoke("NextScene", timeBreak);
+    }
+
+    void StartCrashSequence()
+    {
+        GetComponent<Movement>().enabled = false;
+        isControllable = false;
+        audioSource.Stop();
+        audioSource.PlayOneShot(crashSound);
+        Invoke("ReloadScene", timeBreak);
+    }
+
+    void NextScene()
+    {
+        int nextScene = currentScene + 1;
+
+        if (nextScene == SceneManager.sceneCountInBuildSettings)
+        {
+            nextScene = 0;
+        }
+
+        SceneManager.LoadScene(nextScene);
+    }
+
+    void ReloadScene()
+    {
+        SceneManager.LoadScene(currentScene);
+    }
+
 }
